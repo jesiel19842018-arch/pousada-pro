@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🏡 Pousada Pro - Gestão de Reservas</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding-bottom: 80px;
+    }
+
+    header {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    header h1 {
+      color: #667eea;
+      font-size: 28px;
+      margin-bottom: 5px;
+    }
+
+    header p {
+      color: #666;
+      font-size: 14px;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 20px auto;
+      padding: 0 15px;
+    }
+
+    .tela {
+      display: none;
+    }
+
+    .tela.ativa {
+      display: block;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .card h2 {
+      color: #333;
+      margin-bottom: 15px;
+      font-size: 20px;
+      border-bottom: 2px solid #667eea;
+      padding-bottom: 10px;
+    }
+
+    .card h3 {
+      color: #333;
+      margin-top: 20px;
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      color: #555;
+      font-weight: 600;
+      margin-top: 12px;
+      margin-bottom: 5px;
+      font-size: 14px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+      font-family: inherit;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+    }
+
+    textarea {
+      resize: vertical;
+    }
+
+    button {
+      background: #667eea;
+      color: white;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition: background 0.3s;
+      width: 100%;
+      margin-top: 15px;
+    }
+
+    button:hover {
+      background: #5568d3;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    .linha {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+    }
+
+    .stat {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .stat .num {
+      font-size: 32px;
+      font-weight: bold;
+      color: #667eea;
+    }
+
+    .stat .lbl {
+      color: #666;
+      font-size: 13px;
+      margin-top: 8px;
+    }
+
+    .total {
+      font-size: 24px;
+      font-weight: bold;
+      color: #667eea;
+      padding: 15px;
+      background: #f5f7ff;
+      border-radius: 8px;
+      text-align: center;
+      margin: 15px 0;
+    }
+
+    .item {
+      background: #f9f9f9;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      border-left: 4px solid #667eea;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .item-info {
+      flex: 1;
+    }
+
+    .item-info strong {
+      display: block;
+      color: #333;
+      margin-bottom: 5px;
+    }
+
+    .item-info small {
+      color: #999;
+      font-size: 12px;
+    }
+
+    .item-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 12px;
+      width: auto;
+      margin: 0;
+    }
+
+    .btn-delete {
+      background: #e74c3c;
+    }
+
+    .btn-delete:hover {
+      background: #c0392b;
+    }
+
+    .btn-edit {
+      background: #f39c12;
+    }
+
+    .btn-edit:hover {
+      background: #d68910;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-top: 5px;
+    }
+
+    .badge-livre {
+      background: #2ecc71;
+      color: white;
+    }
+
+    .badge-ocupado {
+      background: #e74c3c;
+      color: white;
+    }
+
+    .badge-limpeza {
+      background: #f39c12;
+      color: white;
+    }
+
+    .badge-manutencao {
+      background: #95a5a6;
+      color: white;
+    }
+
+    .nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      background: white;
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .nav button {
+      width: 100%;
+      margin: 0;
+      padding: 12px 10px;
+      border: none;
+      background: transparent;
+      border-radius: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: #999;
+      transition: color 0.3s;
+    }
+
+    .nav button.ativo {
+      color: #667eea;
+      border-top: 3px solid #667eea;
+    }
+
+    .nav .ico {
+      font-size: 20px;
+    }
+
+    .nav button span:last-child {
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .empty {
+      text-align: center;
+      color: #999;
+      padding: 30px;
+      font-size: 14px;
+    }
+
+    @media (max-width: 600px) {
+      .linha {
+        grid-template-columns: 1fr;
+      }
+
+      .grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      header h1 {
+        font-size: 22px;
+      }
+
+      .item {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .item-actions {
+        width: 100%;
+        margin-top: 10px;
+      }
+
+      .item-actions .btn-sm {
+        flex: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🏡 Pousada Pro</h1>
+    <p>Gestão de Reservas</p>
+  </header>
+
+  <div class="container">
+
+    <!-- DASHBOARD -->
+    <div id="tela-dashboard" class="tela ativa">
+      <div class="grid" style="margin-bottom:12px;">
+        <div class="stat"><div class="num" id="statQuartos">0</div><div class="lbl">Quartos</div></div>
+        <div class="stat"><div class="num" id="statOcupados">0</div><div class="lbl">Ocupados</div></div>
+        <div class="stat"><div class="num" id="statLivres">0</div><div class="lbl">Livres</div></div>
+        <div class="stat"><div class="num" id="statReservas">0</div><div class="lbl">Reservas ativas</div></div>
+      </div>
+      <div class="card">
+        <h2>💰 Faturamento do mês</h2>
+        <div class="total" id="fatMes">R$ 0,00</div>
+        <div class="linha" style="font-size:13px;">
+          <div>🟢 Entradas: <b id="entradasMes">R$ 0,00</b></div>
+          <div>🔴 Saídas: <b id="saidasMes">R$ 0,00</b></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>📅 Check-ins de hoje</h2>
+        <div id="checkinsHoje"></div>
+      </div>
+    </div>
+
+    <!-- QUARTOS -->
+    <div id="tela-quartos" class="tela">
+      <div class="card">
+        <h2>➕ Novo Quarto</h2>
+        <label>Número</label>
+        <input id="qNumero" placeholder="Ex: 101">
+        <label>Tipo</label>
+        <select id="qTipo">
+          <option>Solteiro</option>
+          <option>Casal</option>
+          <option>Família</option>
+          <option>Suíte</option>
+        </select>
+        <div class="linha">
+          <div><label>Capacidade</label><input id="qCapacidade" type="number" value="2" min="1"></div>
+          <div><label>Valor diária (R$)</label><input id="qValor" type="number" value="150" min="0" step="0.01"></div>
+        </div>
+        <label>Status</label>
+        <select id="qStatus">
+          <option value="livre">Livre</option>
+          <option value="ocupado">Ocupado</option>
+          <option value="limpeza">Limpeza</option>
+          <option value="manutencao">Manutenção</option>
+        </select>
+        <button onclick="salvarQuarto()">💾 Salvar Quarto</button>
+      </div>
+      <h3>🛏️ Quartos cadastrados</h3>
+      <div id="listaQuartos"></div>
+    </div>
+
+    <!-- RESERVAS -->
+    <div id="tela-reservas" class="tela">
+      <div class="card">
+        <h2>➕ Nova Reserva</h2>
+        <label>Hóspede</label>
+        <input id="rHospede" placeholder="Nome do hóspede">
+        <label>Telefone</label>
+        <input id="rTelefone" type="tel" placeholder="(00) 00000-0000">
+        <label>Quarto</label>
+        <select id="rQuarto"></select>
+        <div class="linha">
+          <div><label>Check-in</label><input id="rCheckin" type="date"></div>
+          <div><label>Check-out</label><input id="rCheckout" type="date"></div>
+        </div>
+        <label>Observações</label>
+        <textarea id="rObs" rows="2" placeholder="Ex: chegada prevista 14h"></textarea>
+        <div class="total" id="rTotal">Valor total: R$ 0,00</div>
+        <button onclick="salvarReserva()">💾 Salvar Reserva</button>
+      </div>
+      <h3>📅 Reservas</h3>
+      <div id="listaReservas"></div>
+    </div>
+
+    <!-- FINANCEIRO -->
+    <div id="tela-financeiro" class="tela">
+      <div class="card">
+        <h2>➕ Novo Lançamento</h2>
+        <label>Descrição</label>
+        <input id="fDesc" placeholder="Ex: Reserva quarto 101">
+        <div class="linha">
+          <div><label>Valor (R$)</label><input id="fValor" type="number" step="0.01" min="0"></div>
+          <div><label>Tipo</label>
+            <select id="fTipo">
+              <option value="entrada">Entrada</option>
+              <option value="saida">Saída</option>
+            </select>
+          </div>
+        </div>
+        <button onclick="salvarLancamento()">💾 Salvar</button>
+      </div>
+      <div class="card">
+        <h2>📊 Saldo</h2>
+        <div class="total" id="saldoTotal">Saldo: R$ 0,00</div>
+      </div>
+      <h3>💵 Lançamentos</h3>
+      <div id="listaFinanceiro"></div>
+    </div>
+
+  </div>
+
+  <nav class="nav">
+    <button onclick="irPara('dashboard')" id="nav-dashboard" class="ativo"><span class="ico">🏠</span><span>Início</span></button>
+    <button onclick="irPara('quartos')" id="nav-quartos"><span class="ico">🛏️</span><span>Quartos</span></button>
+    <button onclick="irPara('reservas')" id="nav-reservas"><span class="ico">📅</span><span>Reservas</span></button>
+    <button onclick="irPara('financeiro')" id="nav-financeiro"><span class="ico">💰</span><span>Financeiro</span></button>
+  </nav>
+
+  <script>
+    // ========== DADOS ==========
+    let quartos = JSON.parse(localStorage.getItem('quartos')) || [];
+    let reservas = JSON.parse(localStorage.getItem('reservas')) || [];
+    let financeiro = JSON.parse(localStorage.getItem('financeiro')) || [];
+
+    // ========== NAVEGAÇÃO ==========
+    function irPara(tela) {
+      document.querySelectorAll('.tela').forEach(el => el.classList.remove('ativa'));
+      document.getElementById('tela-' + tela).classList.add('ativa');
+      
+      document.querySelectorAll('.nav button').forEach(btn => btn.classList.remove('ativo'));
+      document.getElementById('nav-' + tela).classList.add('ativo');
+
+      if (tela === 'dashboard') atualizarDashboard();
+      if (tela === 'quartos') atualizarListaQuartos();
+      if (tela === 'reservas') atualizarListaReservas();
+      if (tela === 'financeiro') atualizarListaFinanceiro();
+    }
+
+    // ========== QUARTOS ==========
+    function salvarQuarto() {
+      const numero = document.getElementById('qNumero').value.trim();
+      const tipo = document.getElementById('qTipo').value;
+      const capacidade = parseInt(document.getElementById('qCapacidade').value);
+      const valor = parseFloat(document.getElementById('qValor').value);
+      const status = document.getElementById('qStatus').value;
+
+      if (!numero) {
+        alert('⚠️ Digite o número do quarto');
+        return;
+      }
+
+      if (quartos.some(q => q.numero === numero)) {
+        alert('⚠️ Quarto ' + numero + ' já cadastrado');
+        return;
+      }
+
+      quartos.push({ numero, tipo, capacidade, valor, status, id: Date.now() });
+      localStorage.setItem('quartos', JSON.stringify(quartos));
+      
+      document.getElementById('qNumero').value = '';
+      document.getElementById('qCapacidade').value = 2;
+      document.getElementById('qValor').value = 150;
+      
+      atualizarListaQuartos();
+      atualizarSelectQuartos();
+      alert('✅ Quarto salvo com sucesso!');
+    }
+
+    function deletarQuarto(id) {
+      if (confirm('❌ Tem certeza que quer deletar este quarto?')) {
+        quartos = quartos.filter(q => q.id !== id);
+        localStorage.setItem('quartos', JSON.stringify(quartos));
+        atualizarListaQuartos();
+        atualizarSelectQuartos();
+      }
+    }
+
+    function atualizarListaQuartos() {
+      const lista = document.getElementById('listaQuartos');
+      
+      if (quartos.length === 0) {
+        lista.innerHTML = '<div class="empty">Nenhum quarto cadastrado</div>';
+        return;
+      }
+
+      lista.innerHTML = quartos.map(q => `
+        <div class="item">
+          <div class="item-info">
+            <strong>Quarto ${q.numero} - ${q.tipo}</strong>
+            <small>Capacidade: ${q.capacidade} | Diária: R$ ${q.valor.toFixed(2)}</small>
+            <span class="badge badge-${q.status}">${q.status.toUpperCase()}</span>
+          </div>
+          <div class="item-actions">
+            <button class="btn-sm btn-delete" onclick="deletarQuarto(${q.id})">🗑️ Deletar</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function atualizarSelectQuartos() {
+      const select = document.getElementById('rQuarto');
+      select.innerHTML = '<option value="">Selecione um quarto</option>' + 
+        quartos.map(q => `<option value="${q.id}">${q.numero} - ${q.tipo} (R$ ${q.valor.toFixed(2)})</option>`).join('');
+    }
+
+    // ========== RESERVAS ==========
+    function salvarReserva() {
+      const hospede = document.getElementById('rHospede').value.trim();
+      const telefone = document.getElementById('rTelefone').value.trim();
+      const quartoId = document.getElementById('rQuarto').value;
+      const checkin = document.getElementById('rCheckin').value;
+      const checkout = document.getElementById('rCheckout').value;
+      const obs = document.getElementById('rObs').value.trim();
+
+      if (!hospede || !telefone || !quartoId || !checkin || !checkout) {
+        alert('⚠️ Preencha todos os campos obrigatórios');
+        return;
+      }
+
+      const quarto = quartos.find(q => q.id == quartoId);
+      const dias = Math.ceil((new Date(checkout) - new Date(checkin)) / (1000 * 60 * 60 * 24));
+
+      if (dias <= 0) {
+        alert('⚠️ Check-out deve ser depois do check-in');
+        return;
+      }
+
+      const total = dias * quarto.valor;
+
+      reservas.push({
+        hospede, telefone, quartoId, checkin, checkout, obs, total, id: Date.now(), status: 'ativa'
+      });
+      localStorage.setItem('reservas', JSON.stringify(reservas));
+
+      financeiro.push({ desc: `Reserva ${quarto.numero} - ${hospede}`, valor: total, tipo: 'entrada', data: new Date().toISOString(), id: Date.now() });
+      localStorage.setItem('financeiro', JSON.stringify(financeiro));
+
+      document.getElementById('rHospede').value = '';
+      document.getElementById('rTelefone').value = '';
+      document.getElementById('rQuarto').value = '';
+      document.getElementById('rCheckin').value = '';
+      document.getElementById('rCheckout').value = '';
+      document.getElementById('rObs').value = '';
+      document.getElementById('rTotal').innerText = 'Valor total: R$ 0,00';
+
+      atualizarListaReservas();
+      atualizarDashboard();
+      alert('✅ Reserva salva com sucesso!');
+    }
+
+    function calcularTotal() {
+      const quartoId = document.getElementById('rQuarto').value;
+      const checkin = document.getElementById('rCheckin').value;
+      const checkout = document.getElementById('rCheckout').value;
+
+      if (!quartoId || !checkin || !checkout) {
+        document.getElementById('rTotal').innerText = 'Valor total: R$ 0,00';
+        return;
+      }
+
+      const quarto = quartos.find(q => q.id == quartoId);
+      const dias = Math.ceil((new Date(checkout) - new Date(checkin)) / (1000 * 60 * 60 * 24));
+      const total = Math.max(0, dias) * quarto.valor;
+
+      document.getElementById('rTotal').innerText = `Valor total: R$ ${total.toFixed(2)}`;
+    }
+
+    document.addEventListener('change', function(e) {
+      if (['rQuarto', 'rCheckin', 'rCheckout'].includes(e.target.id)) {
+        calcularTotal();
+      }
+    });
+
+    function deletarReserva(id) {
+      if (confirm('❌ Tem certeza que quer deletar esta reserva?')) {
+        const reserva = reservas.find(r => r.id === id);
+        const lancamento = financeiro.find(f => f.desc.includes(reserva.hospede));
+        
+        if (lancamento) {
+          financeiro = financeiro.filter(f => f.id !== lancamento.id);
+          localStorage.setItem('financeiro', JSON.stringify(financeiro));
+        }
+
+        reservas = reservas.filter(r => r.id !== id);
+        localStorage.setItem('reservas', JSON.stringify(reservas));
+        atualizarListaReservas();
+        atualizarDashboard();
+      }
+    }
+
+    function atualizarListaReservas() {
+      const lista = document.getElementById('listaReservas');
+      
+      if (reservas.length === 0) {
+        lista.innerHTML = '<div class="empty">Nenhuma reserva cadastrada</div>';
+        return;
+      }
+
+      lista.innerHTML = reservas.map(r => {
+        const quarto = quartos.find(q => q.id == r.quartoId);
+        return `
+          <div class="item">
+            <div class="item-info">
+              <strong>${r.hospede}</strong>
+              <small>Quarto ${quarto.numero} | ${r.checkin} até ${r.checkout}</small>
+              <small>Telefone: ${r.telefone}</small>
+              <small style="display:block; margin-top:5px;">💰 Total: R$ ${r.total.toFixed(2)}</small>
+              ${r.obs ? `<small>📝 ${r.obs}</small>` : ''}
+            </div>
+            <div class="item-actions">
+              <button class="btn-sm btn-delete" onclick="deletarReserva(${r.id})">🗑️ Deletar</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // ========== FINANCEIRO ==========
+    function salvarLancamento() {
+      const desc = document.getElementById('fDesc').value.trim();
+      const valor = parseFloat(document.getElementById('fValor').value);
+      const tipo = document.getElementById('fTipo').value;
+
+      if (!desc || !valor || valor <= 0) {
+        alert('⚠️ Preencha todos os campos corretamente');
+        return;
+      }
+
+      financeiro.push({ desc, valor, tipo, data: new Date().toISOString(), id: Date.now() });
+      localStorage.setItem('financeiro', JSON.stringify(financeiro));
+
+      document.getElementById('fDesc').value = '';
+      document.getElementById('fValor').value = '';
+      document.getElementById('fTipo').value = 'entrada';
+
+      atualizarListaFinanceiro();
+      atualizarDashboard();
+      alert('✅ Lançamento salvo com sucesso!');
+    }
+
+    function deletarLancamento(id) {
+      if (confirm('❌ Tem certeza que quer deletar este lançamento?')) {
+        financeiro = financeiro.filter(f => f.id !== id);
+        localStorage.setItem('financeiro', JSON.stringify(financeiro));
+        atualizarListaFinanceiro();
+        atualizarDashboard();
+      }
+    }
+
+    function atualizarListaFinanceiro() {
+      const lista = document.getElementById('listaFinanceiro');
+      
+      if (financeiro.length === 0) {
+        lista.innerHTML = '<div class="empty">Nenhum lançamento cadastrado</div>';
+        return;
+      }
+
+      const saldo = financeiro.reduce((acc, f) => acc + (f.tipo === 'entrada' ? f.valor : -f.valor), 0);
+
+      lista.innerHTML = financeiro.map(f => `
+        <div class="item">
+          <div class="item-info">
+            <strong>${f.desc}</strong>
+            <small>${new Date(f.data).toLocaleDateString('pt-BR')}</small>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-weight: bold; color: ${f.tipo === 'entrada' ? '#2ecc71' : '#e74c3c'}; margin-bottom: 8px;">
+              ${f.tipo === 'entrada' ? '+' : '-'} R$ ${f.valor.toFixed(2)}
+            </div>
+            <button class="btn-sm btn-delete" onclick="deletarLancamento(${f.id})">🗑️ Deletar</button>
+          </div>
+        </div>
+      `).join('');
+
+      document.getElementById('saldoTotal').innerText = `Saldo: R$ ${saldo.toFixed(2)}`;
+    }
+
+    // ========== DASHBOARD ==========
+    function atualizarDashboard() {
+      document.getElementById('statQuartos').innerText = quartos.length;
+      document.getElementById('statOcupados').innerText = quartos.filter(q => q.status === 'ocupado').length;
+      document.getElementById('statLivres').innerText = quartos.filter(q => q.status === 'livre').length;
+      document.getElementById('statReservas').innerText = reservas.filter(r => r.status === 'ativa').length;
+
+      const agora = new Date();
+      const hoje = agora.getFullYear() + '-' + String(agora.getMonth() + 1).padStart(2, '0') + '-' + String(agora.getDate()).padStart(2, '0');
+      const checkinsHoje = reservas.filter(r => r.checkin === hoje && r.status === 'ativa');
+
+      const checkinsDiv = document.getElementById('checkinsHoje');
+      if (checkinsHoje.length === 0) {
+        checkinsDiv.innerHTML = '<div class="empty">Nenhum check-in hoje</div>';
+      } else {
+        checkinsDiv.innerHTML = checkinsHoje.map(r => {
+          const quarto = quartos.find(q => q.id == r.quartoId);
+          return `<div class="item"><div class="item-info"><strong>${r.hospede}</strong><small>Quarto ${quarto.numero} • Telefone: ${r.telefone}</small></div></div>`;
+        }).join('');
+      }
+
+      const mesAtual = agora.getMonth();
+      const anoAtual = agora.getFullYear();
+
+      let entradas = 0, saidas = 0;
+
+      financeiro.forEach(f => {
+        const dataLancamento = new Date(f.data);
+        if (dataLancamento.getMonth() === mesAtual && dataLancamento.getFullYear() === anoAtual) {
+          if (f.tipo === 'entrada') entradas += f.valor;
+          else saidas += f.valor;
+        }
+      });
+
+      const faturamento = entradas - saidas;
+
+      document.getElementById('fatMes').innerText = `R$ ${faturamento.toFixed(2)}`;
+      document.getElementById('entradasMes').innerText = `R$ ${entradas.toFixed(2)}`;
+      document.getElementById('saidasMes').innerText = `R$ ${saidas.toFixed(2)}`;
+    }
+
+    // ========== INICIALIZAÇÃO ==========
+    atualizarSelectQuartos();
+    atualizarDashboard();
+  </script>
+</body>
+</html>
